@@ -1,34 +1,23 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 유튜브 먹방 맛집의 랭킹을 보여주는 웹서비스
 
-## Getting Started
+## 적용할 스택
 
-First, run the development server:
+- zustand
+- supabase
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+## 작동 방식
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+가정:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. 성시경님 먹을텐데 채널에 올라온 맛집이 있다.
+2. 포인트를 부여(성시경님 먹을텐데: +5점, 유튜버별 가중치: 구독자 숫자를 기준으로)
+3. 여러 유튜버 분들이 추천한 맛집 점수와 목록
+4. 지역별, 종류(한식, 양식, 중식, 일식...)별 분류해서 보고 싶음.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### 어떻게 맛집 위치 정보만 저장할 것인가?
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- 사람들이 올릴 수 있도록 함
+- 소셜 회원가입
+- 직접 업로드 할 수 있도록
+- 작성자가 잘못된 정보를 기입하는 경우에는 어떻게 할 것인가?
+- 최초로 등록한 분들은 점수를 얻어서 랭킹에 올라가는
