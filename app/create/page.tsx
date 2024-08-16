@@ -1,6 +1,6 @@
 "use client";
 import InputField from "@/components/InputField";
-import { useYoutuber } from "@/store";
+import { useUser, useYoutuber } from "@/store";
 import { InsertedMenu, RestorantEditableField, TYoutuber } from "@/types";
 import { mergeClassNames } from "@/utils/convert";
 import { useSupabase } from "@/utils/hooks/useSupabase";
@@ -58,13 +58,15 @@ export default function CreatePage() {
   const router = useRouter();
   const { supabase } = useSupabase();
   const { list } = useYoutuber();
+  const { id } = useUser();
   const [createLoading, setCreateLoading] = useState<boolean>(false);
   const [menuItems, setMenus] = useState<InsertedMenu[]>([
     {
+      userId: "",
       name: "",
       price: 0,
-      description: "",
-      imageSrc: undefined,
+      description: null,
+      imageSrc: null,
       category: "",
     },
   ]);
@@ -85,10 +87,11 @@ export default function CreatePage() {
     setMenus((prev: InsertedMenu[]) => [
       ...prev,
       {
+        userId: "",
         name: "",
         price: 0,
-        description: "",
-        imageSrc: undefined,
+        description: null,
+        imageSrc: null,
         category: "",
       },
     ]);
@@ -107,7 +110,7 @@ export default function CreatePage() {
 
     // 메뉴가 1개 이상 등록되어 있어야 함
     if (menuItems.length === 0) {
-      toast.error("🍔 메뉴를 1개 이상 등록해주세요!!")
+      toast.error("🍔 메뉴를 1개 이상 등록해주세요!!");
       return;
     }
 
@@ -115,17 +118,22 @@ export default function CreatePage() {
 
     // 유튜버도 1명 이상 체크가 되어야 함
     if (restorant.youtubers.length === 0) {
-      toast.error("🍖 유튜버를 1명 이상 선택해주세요!!")
+      toast.error("🍖 유튜버를 1명 이상 선택해주세요!!");
       return;
     }
 
     setCreateLoading(true);
-
+   
     // Insert menu items and get their IDs
     const { data: insertedMenus, error: menuError } = await supabase
-      .from("menu")
-      .insert(menuItems)
-      .select();
+      .from("restorant_menu")
+      .insert(
+        menuItems.map((el) => ({
+          ...el,
+          userId: id,
+        }))
+      )
+      .select("id");
 
     if (menuError) {
       console.error("Error inserting menu items:", menuError);
@@ -225,6 +233,17 @@ export default function CreatePage() {
                 setMenus((prev) => {
                   const newMenus = [...prev];
                   newMenus[index].description = value;
+                  return newMenus;
+                });
+              }}
+            />
+            <InputField
+              label="이미지 주소"
+              value={menu.imageSrc || ""}
+              onChange={(value) => {
+                setMenus((prev) => {
+                  const newMenus = [...prev];
+                  newMenus[index].imageSrc = value;
                   return newMenus;
                 });
               }}

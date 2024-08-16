@@ -1,14 +1,14 @@
 "use client";
 import { useUser, useYoutuber } from "@/store";
 import { createClient } from "../supabase/client";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 export const useSupabase = () => {
   const supabase = createClient();
   const { id, email, login, logout } = useUser();
-  const { setYoutuber } = useYoutuber();
+  const { list, setYoutuber } = useYoutuber();
 
-  const getUser = async () => {
+  const getUser = useCallback(async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -27,15 +27,15 @@ export const useSupabase = () => {
       email: "",
       load: true,
     });
-  };
+  }, [id]);
 
-  const getYoutubers = async () => {
+  const getYoutubers = useCallback(async () => {
     const { data: youtuber } = await supabase.from("youtuber").select();
 
     if (youtuber) {
       setYoutuber(youtuber);
     }
-  };
+  }, [list]);
 
   // console.log("user: ", user);
 
@@ -45,9 +45,13 @@ export const useSupabase = () => {
   };
 
   useEffect(() => {
-    getUser();
-    getYoutubers();
-  }, [id]);
+    if (id === "") {
+      getUser();
+    }
+    if (list.length === 0) {
+      getYoutubers();
+    }
+  }, [id, list]);
 
   return {
     supabase,

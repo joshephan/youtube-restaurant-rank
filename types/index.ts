@@ -12,8 +12,9 @@ export interface IMenu extends InsertedMenu {
 export interface InsertedMenu {
   name: string; // 메뉴의 이름
   price: number; // 가격
-  description?: string; // 설명
-  imageSrc?: string; // 메뉴 이미지
+  description: string | null; // 설명
+  imageSrc: string | null; // 메뉴 이미지
+  userId: string; // 작성자 아이디
   category: string; // 양식, 한식, 일식 ... 나중에 enum 변경
 }
 
