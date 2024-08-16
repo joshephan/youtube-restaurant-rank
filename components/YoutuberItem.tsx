@@ -1,4 +1,5 @@
 import { TYoutuber } from "@/types";
+import { commaConverter } from "@/utils/convert";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -6,16 +7,26 @@ import React from "react";
 /**
  * 유튜버 목록만 따로 볼 때 사용되는 아이템
  */
-export default function YoutuberItem(props: TYoutuber) {
+function YoutuberItem({ youtuber }: { youtuber: TYoutuber }) {
   return (
-    <Link href={`/y/${props.id}`}>
+    <article className="flex gap-2 items-center">
       <Image
-        src={props.profileImage}
+        src={youtuber.profileImage}
         width={100}
         height={100}
-        alt={props.channelName}
+        alt={youtuber.channelName}
       />
-      <div>{props.channelName}</div>
-    </Link>
+      <div>
+        <div>{youtuber.channelName}</div>
+        <div>구독자: {commaConverter(youtuber.subscriber)}명</div>
+        <Link href={youtuber.channelUrl} target="_blank">
+          {youtuber.channelUrl}
+        </Link>
+      </div>
+    </article>
   );
 }
+
+const MemorizedYoutuberItem = React.memo(YoutuberItem);
+
+export default MemorizedYoutuberItem;

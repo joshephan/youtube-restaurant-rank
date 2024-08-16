@@ -25,39 +25,44 @@ const useRestorantList = create<restorantState>((set) => ({
 
 type youtuberState = {
   list: TYoutuber[];
+  setYoutuber: (list: TYoutuber[]) => void;
 };
 
 // 유튜버를 상태에 저장하고, 불러올 것임
 // 마찬가지로 session 짱박아가지고 돈을 아낄거임
 const useYoutuber = create<youtuberState>((set) => ({
   list: [], // 최대 1000개, CRUD
-  init: (list: TYoutuber[]) =>
+  setYoutuber: (list: TYoutuber[]) =>
     set(() => ({
       list: list,
     })),
 }));
 
-const useUser = create((set) => ({
+type TUser = {
+  id: string;
+  email: string;
+  load: boolean;
+  login: (user: any) => void;
+  logout: () => void;
+};
+
+const useUser = create<TUser>((set) => ({
   id: "",
-  nickname: "", // 수정을 제공
-  createdAt: "", // 가입일
-  updatedAt: "", // 최종 수정일
+  email: "",
+  load: false,
   // profileImageUrl: '', 서비스 비용 측면상 못 넣습니다
   login: (user: any) =>
     set(() => ({
       id: user.id,
-      nickname: user.nickname,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      email: user.email,
+      load: true,
     })),
   logout: () =>
     set(() => ({
       id: "",
-      nickname: "",
-      createdAt: "",
-      updatedAt: "",
+      email: "",
+      load: false,
     })),
-  editNickname: (nickname: string) => set(() => ({ nickname })),
 }));
 
 export { useRestorantList, useUser, useYoutuber };

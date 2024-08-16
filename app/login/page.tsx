@@ -1,3 +1,4 @@
+'use client';
 import { createClient } from "@/utils/supabase/client";
 import React from "react";
 
@@ -12,7 +13,7 @@ export default function LoginPage() {
     supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `/auth/callback`,
+        redirectTo: `http://localhost:3000/auth/callback`,
       },
     });
   };
