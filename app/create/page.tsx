@@ -1,4 +1,5 @@
 "use client";
+import Container from "@/components/Container";
 import InputField from "@/components/InputField";
 import { useUser, useYoutuber } from "@/store";
 import { InsertedMenu, RestorantEditableField, TYoutuber } from "@/types";
@@ -62,8 +63,9 @@ export default function CreatePage() {
   const [createLoading, setCreateLoading] = useState<boolean>(false);
   const [menuItems, setMenus] = useState<InsertedMenu[]>([
     {
-      userId: "",
+      authorId: "",
       name: "",
+      restorantId: 0,
       price: 0,
       description: null,
       imageSrc: null,
@@ -79,7 +81,7 @@ export default function CreatePage() {
     homepageUrl: "",
     latitude: "", // api로 콜백으로 넣어야 하는 부분
     longitube: "", // api로 콜백으로 넣어야 하는 부분
-    menu: [], // 각각의 메뉴를 추가해야 하니까 UI가 복잡할듯
+    menus: [], // 각각의 메뉴를 추가해야 하니까 UI가 복잡할듯
     youtubers: [], // multi select
   });
 
@@ -87,7 +89,8 @@ export default function CreatePage() {
     setMenus((prev: InsertedMenu[]) => [
       ...prev,
       {
-        userId: "",
+        authorId: id,
+        restorantId: 0,
         name: "",
         price: 0,
         description: null,
@@ -123,21 +126,53 @@ export default function CreatePage() {
     }
 
     setCreateLoading(true);
-   
+
+    const { data } = await supabase.from("restorant").select();
+
+    console.log("restorant: ", data);
+
+    // Insert restaurant first
+    const { data: insertedRestorant, error: restorantError } = await supabase
+      .from("restorant")
+      .insert({
+        ...restorant,
+        authorId: id,
+        youtubers: restorant.youtubers.map((el) => el.id),
+        menus: [],
+      })
+      .select("id");
+
+    if (restorantError) {
+      console.error("Error inserting restaurant:", restorantError);
+      toast.error("🥘 식당 업로드가 실패했습니다!!");
+      setCreateLoading(false);
+      return;
+    }
+
+    if (!insertedRestorant || insertedRestorant.length === 0) {
+      console.error("Failed to get inserted restaurant ID");
+      toast.error("💩 서비스가 뭔가가 실패했습니다!!");
+      setCreateLoading(false);
+      return;
+    }
+
+    const newRestorantId = insertedRestorant[0].id;
+
     // Insert menu items and get their IDs
     const { data: insertedMenus, error: menuError } = await supabase
       .from("restorant_menu")
       .insert(
         menuItems.map((el) => ({
           ...el,
-          userId: id,
+          authorId: id,
+          restorantId: newRestorantId,
         }))
       )
       .select("id");
 
-    if (menuError) {
+    if (menuError || !insertedMenus || insertedMenus.length === 0) {
       console.error("Error inserting menu items:", menuError);
-      toast.error("🍔 메뉴 업로드가 실패했습니다!!")
+      toast.error("🍔 메뉴 업로드가 실패했습니다!!");
       setCreateLoading(false);
       return;
     }
@@ -145,18 +180,15 @@ export default function CreatePage() {
     // Extract the IDs of the inserted menu items
     const menuIds = insertedMenus.map((menu) => menu.id);
 
-    // Insert restaurant with the menu IDs
-    const { data: insertedRestorant, error: restorantError } = await supabase
+    // Update restaurant with the menu IDs
+    const { error: updateError } = await supabase
       .from("restorant")
-      .insert({
-        ...restorant,
-        menu: menuIds,
-      })
-      .select();
+      .update({ menus: menuIds })
+      .eq("id", newRestorantId);
 
-    if (restorantError) {
-      console.error("Error inserting restaurant:", restorantError);
-      toast.error("🥘 식당 업로드가 실패했습니다!!")
+    if (updateError) {
+      console.error("Error updating restaurant with menu IDs:", updateError);
+      toast.error("🥘 식당 메뉴 업데이트가 실패했습니다!!");
       setCreateLoading(false);
       return;
     }
@@ -166,174 +198,176 @@ export default function CreatePage() {
       router.push(`/r/${newRestorantId}`);
     } else {
       console.error("Failed to get inserted restaurant ID");
-      toast.error("💩 서비스가 뭔가가 실패했습니다!!")
+      toast.error("💩 서비스가 뭔가가 실패했습니다!!");
       setCreateLoading(false);
     }
   };
 
   return (
-    <section className="grid grid-cols-2">
-      <div className="p-4">
-        <SubTitle>식당 정보</SubTitle>
-        <CardContainer>
-          {STRINGTYPE_INPUT_FIELDS.map((el) => (
-            <InputField
-              key={el.label}
-              label={el.label}
-              // @ts-ignore
-              value={restorant[el.key as keyof RestorantEditableField]}
-              onChange={(value) => {
-                setRestorant((prev) => ({
-                  ...prev,
-                  [el.key]: value,
-                }));
-              }}
-            />
+    <Container>
+      <section className="grid grid-cols-2">
+        <div className="p-4">
+          <SubTitle>식당 정보</SubTitle>
+          <CardContainer>
+            {STRINGTYPE_INPUT_FIELDS.map((el) => (
+              <InputField
+                key={el.label}
+                label={el.label}
+                // @ts-ignore
+                value={restorant[el.key as keyof RestorantEditableField]}
+                onChange={(value) => {
+                  setRestorant((prev) => ({
+                    ...prev,
+                    [el.key]: value,
+                  }));
+                }}
+              />
+            ))}
+          </CardContainer>
+        </div>
+        <div className="p-4">
+          <div className="flex justify-between items-center">
+            <SubTitle>메뉴 정보</SubTitle>
+            <button
+              className="rounded-lg px-3 py-1 bg-blue-400 text-white font-medium"
+              onClick={() => addMenuItem()}
+            >
+              메뉴 추가
+            </button>
+          </div>
+          {menuItems.map((menu, index) => (
+            <CardContainer key={index}>
+              <InputField
+                label="메뉴 이름"
+                value={menu.name}
+                onChange={(value) => {
+                  setMenus((prev) => {
+                    const newMenus = [...prev];
+                    newMenus[index].name = value;
+                    return newMenus;
+                  });
+                }}
+              />
+              <InputField
+                label="가격"
+                value={menu.price.toString()}
+                onChange={(value) => {
+                  setMenus((prev) => {
+                    const newMenus = [...prev];
+                    newMenus[index].price = Number(value);
+                    return newMenus;
+                  });
+                }}
+              />
+              <InputField
+                label="설명"
+                value={menu.description || ""}
+                onChange={(value) => {
+                  setMenus((prev) => {
+                    const newMenus = [...prev];
+                    newMenus[index].description = value;
+                    return newMenus;
+                  });
+                }}
+              />
+              <InputField
+                label="이미지 주소"
+                value={menu.imageSrc || ""}
+                onChange={(value) => {
+                  setMenus((prev) => {
+                    const newMenus = [...prev];
+                    newMenus[index].imageSrc = value;
+                    return newMenus;
+                  });
+                }}
+              />
+              <InputField
+                label="카테고리"
+                value={menu.category}
+                onChange={(value) => {
+                  setMenus((prev) => {
+                    const newMenus = [...prev];
+                    newMenus[index].category = value;
+                    return newMenus;
+                  });
+                }}
+              />
+              <button
+                onClick={() => removeMenuItem(index)}
+                className={mergeClassNames(
+                  "flex gap-1 items-center", // display & alignment
+                  "p-2 rounded-md", // margin padding border radius
+                  "bg-rose-500 text-white hover:bg-rose-700", // color bg
+                  "transition-all duration-200" // transition
+                )}
+              >
+                <IconTrashXFilled size={16} />
+                <span className="text-xs">메뉴 삭제</span>
+              </button>
+            </CardContainer>
           ))}
-        </CardContainer>
-      </div>
-      <div className="p-4">
-        <div className="flex justify-between items-center">
-          <SubTitle>메뉴 정보</SubTitle>
+        </div>
+        <div className="p-4">
+          <SubTitle>유튜버 체크</SubTitle>
+          <CardContainer>
+            {list.map((el: TYoutuber) => {
+              return (
+                <label
+                  key={`${el.id}-checkbox`}
+                  htmlFor={`${el.id}`}
+                  className="flex gap-2"
+                >
+                  <input
+                    type="checkbox"
+                    id={`${el.id}`}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setRestorant((prev) => ({
+                          ...prev,
+                          youtubers: [...prev.youtubers, el],
+                        }));
+                      } else {
+                        setRestorant((prev) => ({
+                          ...prev,
+                          youtubers: prev.youtubers.filter(
+                            (youtuber) => youtuber.id !== el.id
+                          ),
+                        }));
+                      }
+                    }}
+                  />
+                  <Image
+                    src={el.profileImage}
+                    width={48}
+                    height={48}
+                    alt={el.channelName}
+                  />
+                  <div>{el.channelName}</div>
+                </label>
+              );
+            })}
+          </CardContainer>
+        </div>
+        <div className="p-4">
+          <SubTitle>등록</SubTitle>
           <button
-            className="rounded-lg px-3 py-1 bg-blue-400 text-white font-medium"
-            onClick={() => addMenuItem()}
+            disabled={createLoading}
+            onClick={async () => {
+              await createRestorant();
+            }}
+            className={mergeClassNames(
+              "flex gap-1 items-center", // display & alignment
+              "p-2 rounded-md", // margin padding border radius
+              "bg-sky-500 text-white hover:bg-sky-700", // color bg
+              "transition-all duration-200", // transition
+              "disabled:opacity-70"
+            )}
           >
-            메뉴 추가
+            <IconSalad size={16} />
+            <span className="text-xs">식당 추가하기</span>
           </button>
         </div>
-        {menuItems.map((menu, index) => (
-          <CardContainer key={index}>
-            <InputField
-              label="메뉴 이름"
-              value={menu.name}
-              onChange={(value) => {
-                setMenus((prev) => {
-                  const newMenus = [...prev];
-                  newMenus[index].name = value;
-                  return newMenus;
-                });
-              }}
-            />
-            <InputField
-              label="가격"
-              value={menu.price.toString()}
-              onChange={(value) => {
-                setMenus((prev) => {
-                  const newMenus = [...prev];
-                  newMenus[index].price = Number(value);
-                  return newMenus;
-                });
-              }}
-            />
-            <InputField
-              label="설명"
-              value={menu.description || ""}
-              onChange={(value) => {
-                setMenus((prev) => {
-                  const newMenus = [...prev];
-                  newMenus[index].description = value;
-                  return newMenus;
-                });
-              }}
-            />
-            <InputField
-              label="이미지 주소"
-              value={menu.imageSrc || ""}
-              onChange={(value) => {
-                setMenus((prev) => {
-                  const newMenus = [...prev];
-                  newMenus[index].imageSrc = value;
-                  return newMenus;
-                });
-              }}
-            />
-            <InputField
-              label="카테고리"
-              value={menu.category}
-              onChange={(value) => {
-                setMenus((prev) => {
-                  const newMenus = [...prev];
-                  newMenus[index].category = value;
-                  return newMenus;
-                });
-              }}
-            />
-            <button
-              onClick={() => removeMenuItem(index)}
-              className={mergeClassNames(
-                "flex gap-1 items-center", // display & alignment
-                "p-2 rounded-md", // margin padding border radius
-                "bg-rose-500 text-white hover:bg-rose-700", // color bg
-                "transition-all duration-200" // transition
-              )}
-            >
-              <IconTrashXFilled size={16} />
-              <span className="text-xs">메뉴 삭제</span>
-            </button>
-          </CardContainer>
-        ))}
-      </div>
-      <div className="p-4">
-        <SubTitle>유튜버 체크</SubTitle>
-        <CardContainer>
-          {list.map((el: TYoutuber) => {
-            return (
-              <label
-                key={`${el.id}-checkbox`}
-                htmlFor={`${el.id}`}
-                className="flex gap-2"
-              >
-                <input
-                  type="checkbox"
-                  id={`${el.id}`}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setRestorant((prev) => ({
-                        ...prev,
-                        youtubers: [...prev.youtubers, el],
-                      }));
-                    } else {
-                      setRestorant((prev) => ({
-                        ...prev,
-                        youtubers: prev.youtubers.filter(
-                          (youtuber) => youtuber.id !== el.id
-                        ),
-                      }));
-                    }
-                  }}
-                />
-                <Image
-                  src={el.profileImage}
-                  width={48}
-                  height={48}
-                  alt={el.channelName}
-                />
-                <div>{el.channelName}</div>
-              </label>
-            );
-          })}
-        </CardContainer>
-      </div>
-      <div className="p-4">
-        <SubTitle>등록</SubTitle>
-        <button
-          disabled={createLoading}
-          onClick={async () => {
-            await createRestorant();
-          }}
-          className={mergeClassNames(
-            "flex gap-1 items-center", // display & alignment
-            "p-2 rounded-md", // margin padding border radius
-            "bg-sky-500 text-white hover:bg-sky-700", // color bg
-            "transition-all duration-200", // transition
-            "disabled:opacity-70"
-          )}
-        >
-          <IconSalad size={16} />
-          <span className="text-xs">식당 추가하기</span>
-        </button>
-      </div>
-    </section>
+      </section>
+    </Container>
   );
 }

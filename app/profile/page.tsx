@@ -1,4 +1,5 @@
 "use client";
+import Container from "@/components/Container";
 import { useUser } from "@/store";
 import { useSupabase } from "@/utils/hooks/useSupabase";
 import { useRouter } from "next/navigation";
@@ -20,7 +21,7 @@ export default function ProfilePage() {
   }, [load]);
 
   return (
-    <div>
+    <Container>
       <h1>프로필</h1>
       <div>이메일: {email}</div>
       <button
@@ -31,6 +32,6 @@ export default function ProfilePage() {
       >
         로그아웃
       </button>
-    </div>
+    </Container>
   );
 }

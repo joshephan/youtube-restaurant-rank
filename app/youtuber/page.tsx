@@ -1,4 +1,5 @@
 "use client";
+import Container from "@/components/Container";
 import YoutuberItem from "@/components/YoutuberItem";
 import { TYoutuber } from "@/types";
 import { useSupabase } from "@/utils/hooks/useSupabase";
@@ -20,12 +21,14 @@ export default function YoutubersPage() {
     getYoutubers();
   }, []);
 
-  console.log("youtuber: ", list);
   return (
-    <div>
-      {list.map((el) => {
-        return <YoutuberItem key={`${el.id}-youtuber-item`} youtuber={el} />;
-      })}
-    </div>
+    <Container>
+      <h1 className="font-bold text-2xl mb-5">등록된 맛잘알 유튜버</h1>
+      <div className="flex flex-wrap gap-2">
+        {list.map((el) => {
+          return <YoutuberItem key={`${el.id}-youtuber-item`} youtuber={el} />;
+        })}
+      </div>
+    </Container>
   );
 }

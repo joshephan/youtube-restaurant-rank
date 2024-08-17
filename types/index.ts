@@ -10,11 +10,12 @@ export interface IMenu extends InsertedMenu {
 }
 
 export interface InsertedMenu {
+  authorId: string; // 작성자 아이디
   name: string; // 메뉴의 이름
   price: number; // 가격
+  restorantId: number; // 참조할 식당 아이디
   description: string | null; // 설명
   imageSrc: string | null; // 메뉴 이미지
-  userId: string; // 작성자 아이디
   category: string; // 양식, 한식, 일식 ... 나중에 enum 변경
 }
 
@@ -23,7 +24,8 @@ export interface InsertedMenu {
  */
 export type RestorantEditableField = {
   name: string; // 식당의 이름
-  menu: IMenu[]; // 해당 영상에서 추천된 메뉴들
+  heroBannerSrc?: string; // 식당 대표 이미지
+  menus: IMenu[]; // 해당 영상에서 추천된 메뉴들
   locationText: string; // 도로명 주소 텍스트
   category: string; // 식당 차원에서의 카테고리(한식, 일식...)
   kakaomapUrl?: string; // 카카오맵 주소
@@ -47,6 +49,7 @@ export interface IRestorantHistory extends RestorantEditableField {
  */
 export interface IRestorant extends RestorantEditableField {
   id: number; // 프라이머리 키
+  authorId: string; // 작성자 아이디
   createdAt: Date; // 생성일
   updatedAt: Date; // 최근 수정일
   history: IRestorantHistory[]; // 변경된 레코드

@@ -28,9 +28,11 @@
 
 ## 페이지 구성
 
-- main: 랭킹 순으로 식당을 표기
+- main: 메인에서는 이것저것 보여주고
+- /q?keyword=검색어 : 쿼리스트링에 의존해서 검색이 발생
 - /auth/callback: 로그인 콜백 페이지
-- /youtuber: 등록된 유튜버들만 보는 페이지
+- /rank: 식당 순위
+- /youtuber: 등록된 유튜버들이 누구인지 볼 수 있는 페이지
 - /login: 로그인 UI
 - [protected] profile: 닉네임 수정
 - /r/{id}: 각 식당별 페이지

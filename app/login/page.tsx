@@ -1,4 +1,5 @@
 'use client';
+import Container from "@/components/Container";
 import { createClient } from "@/utils/supabase/client";
 import React from "react";
 
@@ -13,12 +14,12 @@ export default function LoginPage() {
     supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `http://localhost:3000/auth/callback`,
+        redirectTo: `${process.env.NEXT_PUBLIC_HOST}/auth/callback`,
       },
     });
   };
   return (
-    <div>
+    <Container>
       <button
         onClick={(e) => {
           e.preventDefault();
@@ -27,6 +28,6 @@ export default function LoginPage() {
       >
         구글 로그인
       </button>
-    </div>
+    </Container>
   );
 }
