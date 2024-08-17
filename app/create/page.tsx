@@ -223,6 +223,7 @@ export default function CreatePage() {
                 }}
               />
             ))}
+            {/* TODO: image upload component를 추가해서 식당 대표 사진을 받도록 변경 */}
           </CardContainer>
         </div>
         <div className="p-4">
@@ -270,6 +271,7 @@ export default function CreatePage() {
                   });
                 }}
               />
+              {/* TODO: image upload component로 변경 */}
               <InputField
                 label="이미지 주소"
                 value={menu.imageSrc || ""}

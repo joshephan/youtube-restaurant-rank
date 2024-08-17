@@ -1,5 +1,5 @@
 import { useUser } from "@/store";
-import { IconSearch } from "@tabler/icons-react";
+import { IconPizza, IconSearch } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,8 +15,9 @@ export default function GNB() {
   const router = useRouter();
   return (
     <nav className="flex justify-between border-b p-5 items-center">
-      <Link href="/" className="text-red-500 font-bold">
-        이름 제발 정해주세요
+      <Link href="/" className="bg-red-500 text-white w-14 h-14 justify-center rounded-full font-bold flex flex-col items-center">
+        <IconPizza size={24} />
+        <span className="text-sm">YRR</span>
       </Link>
       <div className="flex items-center border rounded-full pl-3 py-1 w-full max-w-sm">
         <IconSearch size={20} className="text-gray-400" />
