@@ -12,11 +12,12 @@ export const useSupabase = () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-
     if (user) {
       login({
         id: user.id,
         email: user.email,
+        name: user.user_metadata.name,
+        avatar_url: user.user_metadata.avatar_url,
         load: true,
       });
       return;
@@ -25,6 +26,8 @@ export const useSupabase = () => {
     login({
       id: "",
       email: "",
+      name: "",
+      avatar_url: "",
       load: true,
     });
   }, [id]);

@@ -41,6 +41,8 @@ const useYoutuber = create<youtuberState>((set) => ({
 type TUser = {
   id: string;
   email: string;
+  avatar_url: string;
+  name: string;
   load: boolean;
   login: (user: any) => void;
   logout: () => void;
@@ -49,18 +51,24 @@ type TUser = {
 const useUser = create<TUser>((set) => ({
   id: "",
   email: "",
+  avatar_url: "",
+  name: "",
   load: false,
   // profileImageUrl: '', 서비스 비용 측면상 못 넣습니다
   login: (user: any) =>
     set(() => ({
       id: user.id,
       email: user.email,
+      name: user.name,
+      avatar_url: user.avatar_url,
       load: true,
     })),
   logout: () =>
     set(() => ({
       id: "",
       email: "",
+      name: "",
+      avatar_url: "",
       load: false,
     })),
 }));

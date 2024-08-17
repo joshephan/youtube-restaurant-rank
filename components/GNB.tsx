@@ -1,5 +1,6 @@
-import { useSupabase } from "@/utils/hooks/useSupabase";
+import { useUser } from "@/store";
 import { IconSearch } from "@tabler/icons-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -10,7 +11,7 @@ import React from "react";
  * 비로그인 상태 > 로그인 버튼
  */
 export default function GNB() {
-  const { id } = useSupabase();
+  const { id, avatar_url, name } = useUser();
   const router = useRouter();
   return (
     <nav className="flex justify-between border-b p-5 items-center">
@@ -34,12 +35,18 @@ export default function GNB() {
           }}
         />
       </div>
-      <div className="flex gap-5">
+      <div className="flex gap-7 items-center text-gray-800 font-semibold">
         <Link href="/rank">랭킹</Link>
         <Link href="/youtuber">유튜버</Link>
         {id ? (
           <Link href="/profile" className="text-blue-500">
-            프로필
+            <Image
+              src={avatar_url}
+              width={48}
+              height={48}
+              className="rounded-full shadow-sm border"
+              alt={name}
+            />
           </Link>
         ) : (
           <Link href="/login" className="text-blue-500">
