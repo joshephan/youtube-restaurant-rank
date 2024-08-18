@@ -25,22 +25,18 @@ export default function YoutuberPage() {
       // Fetch youtuber data
       const { data: youtuberData } = await supabase
         .from("youtuber")
-        .select("*")
+        .select(
+          `
+          *,
+          restorant(*, restorant_menu(*))
+          `
+        )
         .eq("id", id)
         .single();
 
       if (youtuberData) {
         setYoutuber(youtuberData);
-
-        // Fetch restorants that contain this youtuber's id
-        const { data: restorantData } = await supabase
-          .from("restorant")
-          .select("*")
-          .contains("youtubers", [youtuberData.id]);
-
-        if (restorantData) {
-          setRestorants(restorantData);
-        }
+        setRestorants(youtuberData.restorant);
       }
     };
 

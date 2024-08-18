@@ -25,7 +25,7 @@ export interface InsertedMenu {
 export type RestorantEditableField = {
   name: string; // 식당의 이름
   heroBannerSrc?: string; // 식당 대표 이미지
-  menus: IMenu[]; // 해당 영상에서 추천된 메뉴들
+  restorant_menu?: IMenu[]; // 해당 영상에서 추천된 메뉴들
   locationText: string; // 도로명 주소 텍스트
   category: string; // 식당 차원에서의 카테고리(한식, 일식...)
   kakaomapUrl?: string; // 카카오맵 주소
@@ -33,7 +33,7 @@ export type RestorantEditableField = {
   homepageUrl?: string; // 식당의 url
   latitude?: string; // 위도, 카카오맵 API 위도 경도 콜백으로 수신
   longitube?: string; // 경도
-  youtubers: TYoutuber[]; // 해당 식당을 추천한 유튜버 리스트
+  youtubers?: TYoutuber[]; // 해당 식당을 추천한 유튜버 리스트
 };
 
 /**

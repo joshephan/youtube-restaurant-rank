@@ -22,23 +22,16 @@ export default function RestorantPage() {
 
     const { data } = await supabase
       .from("restorant")
-      .select("*")
+      .select(
+        `
+        *,
+        restorant_menu(*),
+        youtuber(*)
+      `
+      )
       .eq("id", id)
       .single();
-
-    if (data) {
-      const { data: menus } = await supabase
-        .from("restorant_menu")
-        .select("*")
-        .in("id", data.menus);
-
-      const { data: youtubers } = await supabase
-        .from("youtuber")
-        .select("*")
-        .in("id", data.youtubers);
-
-      setRestorant({ ...data, menus, youtubers });
-    }
+    setRestorant(data);
   };
 
   useEffect(() => {
@@ -65,26 +58,27 @@ export default function RestorantPage() {
       <hr className="my-5" />
       <h2 className="text-2xl font-bold mb-5">대표 메뉴</h2>
       <div className="grid grid-cols-3 gap-3">
-        {restorant.menus.map((el) => {
-          return (
-            <div key={`menu-${el.id}`} className="">
-              <Image
-                src={el.imageSrc!}
-                width={300}
-                height={300}
-                className="object-cover rounded-lg block"
-                alt={el.name}
-              />
-              <div className="flex flex-col py-2 gap-1">
-                <div className="text-lg font-bold">{el.name}</div>
-                <div className="text-sm">{el.description}</div>
-                <div className="text-sm text-rose-700 font-medium">
-                  {commaConverter(el.price)}원
+        {restorant.restorant_menu &&
+          restorant.restorant_menu.map((el) => {
+            return (
+              <div key={`menu-${el.id}`} className="">
+                <Image
+                  src={el.imageSrc!}
+                  width={300}
+                  height={300}
+                  className="object-cover rounded-lg block"
+                  alt={el.name}
+                />
+                <div className="flex flex-col py-2 gap-1">
+                  <div className="text-lg font-bold">{el.name}</div>
+                  <div className="text-sm">{el.description}</div>
+                  <div className="text-sm text-rose-700 font-medium">
+                    {commaConverter(el.price)}원
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
     </Container>
   );

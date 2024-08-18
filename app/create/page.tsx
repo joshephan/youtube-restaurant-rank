@@ -72,6 +72,7 @@ export default function CreatePage() {
       category: "",
     },
   ]);
+  const [youtubers, setYoutubers] = useState<number[]>([]);
   const [restorant, setRestorant] = useState<RestorantEditableField>({
     name: "테스트용 맛집",
     locationText: "테스트용 주소",
@@ -81,8 +82,6 @@ export default function CreatePage() {
     homepageUrl: "",
     latitude: "", // api로 콜백으로 넣어야 하는 부분
     longitube: "", // api로 콜백으로 넣어야 하는 부분
-    menus: [], // 각각의 메뉴를 추가해야 하니까 UI가 복잡할듯
-    youtubers: [], // multi select
   });
 
   const addMenuItem = () => {
@@ -120,7 +119,7 @@ export default function CreatePage() {
     // TODO: 메뉴가 적합한 데이터가 되는지 validate
 
     // 유튜버도 1명 이상 체크가 되어야 함
-    if (restorant.youtubers.length === 0) {
+    if (youtubers.length === 0) {
       toast.error("🍖 유튜버를 1명 이상 선택해주세요!!");
       return;
     }
@@ -137,8 +136,6 @@ export default function CreatePage() {
       .insert({
         ...restorant,
         authorId: id,
-        youtubers: restorant.youtubers.map((el) => el.id),
-        menus: [],
       })
       .select("id");
 
@@ -158,6 +155,26 @@ export default function CreatePage() {
 
     const newRestorantId = insertedRestorant[0].id;
 
+    // Insert entries into restorant_youtuber table
+    const { error: youtuberError } = await supabase
+      .from("restorant_youtuber")
+      .insert(
+        youtubers.map((youtuberId) => ({
+          restorantId: newRestorantId,
+          youtuberId: youtuberId,
+        }))
+      );
+
+    if (youtuberError) {
+      console.error(
+        "Error inserting restorant_youtuber entries:",
+        youtuberError
+      );
+      toast.error("🎥 유튜버 연결에 실패했습니다!!");
+      setCreateLoading(false);
+      return;
+    }
+
     // Insert menu items and get their IDs
     const { data: insertedMenus, error: menuError } = await supabase
       .from("restorant_menu")
@@ -173,22 +190,6 @@ export default function CreatePage() {
     if (menuError || !insertedMenus || insertedMenus.length === 0) {
       console.error("Error inserting menu items:", menuError);
       toast.error("🍔 메뉴 업로드가 실패했습니다!!");
-      setCreateLoading(false);
-      return;
-    }
-
-    // Extract the IDs of the inserted menu items
-    const menuIds = insertedMenus.map((menu) => menu.id);
-
-    // Update restaurant with the menu IDs
-    const { error: updateError } = await supabase
-      .from("restorant")
-      .update({ menus: menuIds })
-      .eq("id", newRestorantId);
-
-    if (updateError) {
-      console.error("Error updating restaurant with menu IDs:", updateError);
-      toast.error("🥘 식당 메뉴 업데이트가 실패했습니다!!");
       setCreateLoading(false);
       return;
     }
@@ -324,17 +325,11 @@ export default function CreatePage() {
                     id={`${el.id}`}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setRestorant((prev) => ({
-                          ...prev,
-                          youtubers: [...prev.youtubers, el],
-                        }));
+                        setYoutubers((prev) => [...prev, el.id]);
                       } else {
-                        setRestorant((prev) => ({
-                          ...prev,
-                          youtubers: prev.youtubers.filter(
-                            (youtuber) => youtuber.id !== el.id
-                          ),
-                        }));
+                        setYoutubers((prev) =>
+                          prev.filter((id) => id !== el.id)
+                        );
                       }
                     }}
                   />
