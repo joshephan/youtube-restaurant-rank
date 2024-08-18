@@ -1,44 +1,44 @@
 "use client";
-import RestorantItem from "@/components/RestorantItem";
-import { IRestorant } from "@/types";
+import RestaurantItem from "@/components/RestaurantItem";
+import { IRestaurant } from "@/types";
 import { useSupabase } from "@/utils/hooks/useSupabase";
 import React, { useEffect, useState } from "react";
 
-export default function RestorantRankPage() {
+export default function RestaurantRankPage() {
   const { supabase } = useSupabase();
-  const [list, setList] = useState<IRestorant[]>([]);
+  const [list, setList] = useState<IRestaurant[]>([]);
 
-  const getRestorants = async () => {
-    const { data: restorants } = await supabase.from("restorant").select("*");
+  const getRestaurants = async () => {
+    const { data: restaurants } = await supabase.from("restaurant").select("*");
 
-    if (restorants) {
-      const restorantsWithYoutubers = await Promise.all(
-        restorants.map(async (restorant) => {
+    if (restaurants) {
+      const restaurantsWithYoutubers = await Promise.all(
+        restaurants.map(async (restaurant) => {
           const { data: menus } = await supabase
-            .from("restorant_menu")
+            .from("restaurant_menu")
             .select("*")
-            .in("id", restorant.menus);
+            .in("id", restaurant.menus);
 
           const { data: youtubers } = await supabase
             .from("youtuber")
             .select("*")
-            .in("id", restorant.youtubers);
-          return { ...restorant, youtubers, menus };
+            .in("id", restaurant.youtubers);
+          return { ...restaurant, youtubers, menus };
         })
       );
-      console.log(restorantsWithYoutubers);
-      setList(restorantsWithYoutubers);
+      console.log(restaurantsWithYoutubers);
+      setList(restaurantsWithYoutubers);
     }
   };
 
   useEffect(() => {
-    getRestorants();
+    getRestaurants();
   }, []);
 
   return (
     <div>
       {list.map((el) => {
-        return <RestorantItem key={`${el.id}-youtuber-item`} restorant={el} />;
+        return <RestaurantItem key={`${el.id}-youtuber-item`} restaurant={el} />;
       })}
     </div>
   );

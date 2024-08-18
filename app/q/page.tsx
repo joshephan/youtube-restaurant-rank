@@ -3,24 +3,24 @@ import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSupabase } from "@/utils/hooks/useSupabase";
 import Container from "@/components/Container";
-import RestorantItem from "@/components/RestorantItem";
+import RestaurantItem from "@/components/RestaurantItem";
 import YoutuberItem from "@/components/YoutuberItem";
-import { IRestorant, TYoutuber } from "@/types";
+import { IRestaurant, TYoutuber } from "@/types";
 
 function SearchContent() {
   const searchParams = useSearchParams();
   const keyword = searchParams.get("keyword") || "";
   const { supabase } = useSupabase();
-  const [restorants, setRestorants] = useState<IRestorant[]>([]);
+  const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
   const [youtubers, setYoutubers] = useState<TYoutuber[]>([]);
   const [menus, setMenus] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchSearchResults = async () => {
       if (keyword) {
-        // Search restorants
-        const { data: restorantData } = await supabase
-          .from("restorant")
+        // Search restaurants
+        const { data: restaurantData } = await supabase
+          .from("restaurant")
           .select("*")
           .ilike("name", `%${keyword}%`);
 
@@ -32,11 +32,11 @@ function SearchContent() {
 
         // Search menus
         const { data: menuData } = await supabase
-          .from("restorant_menu")
-          .select("*, restorant:restorant(*)")
+          .from("restaurant_menu")
+          .select("*, restaurant:restaurant(*)")
           .ilike("name", `%${keyword}%`);
 
-        setRestorants(restorantData || []);
+        setRestaurants(restaurantData || []);
         setYoutubers(youtuberData || []);
         setMenus(menuData || []);
       }
@@ -47,19 +47,19 @@ function SearchContent() {
 
   return (
     <Container>
-      <h1 className="text-2xl font-bold mb-4">키워드 검색 결과: "{keyword}"</h1>
-      {restorants.length > 0 && (
+      <h1 className="mb-4 text-2xl font-bold">키워드 검색 결과: "{keyword}"</h1>
+      {restaurants.length > 0 && (
         <section>
-          <h2 className="text-xl font-semibold mb-2">Restaurants</h2>
-          {restorants.map((restorant) => (
-            <RestorantItem key={restorant.id} restorant={restorant} />
+          <h2 className="mb-2 text-xl font-semibold">Restaurants</h2>
+          {restaurants.map((restaurant) => (
+            <RestaurantItem key={restaurant.id} restaurant={restaurant} />
           ))}
         </section>
       )}
 
       {youtubers.length > 0 && (
         <section className="mt-8">
-          <h2 className="text-xl font-semibold mb-2">Youtubers</h2>
+          <h2 className="mb-2 text-xl font-semibold">Youtubers</h2>
           <div className="flex flex-wrap gap-4">
             {youtubers.map((youtuber) => (
               <YoutuberItem key={youtuber.id} youtuber={youtuber} />
@@ -70,13 +70,13 @@ function SearchContent() {
 
       {menus.length > 0 && (
         <section className="mt-8">
-          <h2 className="text-xl font-semibold mb-2">Menus</h2>
+          <h2 className="mb-2 text-xl font-semibold">Menus</h2>
           <ul>
             {menus.map((menu) => (
               <li key={menu.id} className="mb-2">
                 <p className="font-medium">{menu.name}</p>
                 <p className="text-sm text-gray-600">
-                  Restaurant: {menu.restorant.name}
+                  Restaurant: {menu.restaurant.name}
                 </p>
               </li>
             ))}
@@ -84,7 +84,7 @@ function SearchContent() {
         </section>
       )}
 
-      {restorants.length === 0 &&
+      {restaurants.length === 0 &&
         youtubers.length === 0 &&
         menus.length === 0 && <p>No results found for "{keyword}"</p>}
     </Container>

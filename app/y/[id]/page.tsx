@@ -3,11 +3,11 @@ import React from "react";
 import { useParams } from "next/navigation";
 import { useSupabase } from "@/utils/hooks/useSupabase";
 import { useEffect, useState } from "react";
-import { TYoutuber, IRestorant } from "@/types";
+import { TYoutuber, IRestaurant } from "@/types";
 import Container from "@/components/Container";
 import Image from "next/image";
 import Link from "next/link";
-import RestorantItem from "@/components/RestorantItem";
+import RestaurantItem from "@/components/RestaurantItem";
 
 /**
  * 유튜버별 추천한 식당 리스트를 보여줍니다
@@ -16,7 +16,7 @@ export default function YoutuberPage() {
   const { id } = useParams();
   const { supabase } = useSupabase();
   const [youtuber, setYoutuber] = useState<TYoutuber | null>(null);
-  const [restorants, setRestorants] = useState<IRestorant[]>([]);
+  const [restaurants, setRestaurants] = useState<IRestaurant[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,7 +28,7 @@ export default function YoutuberPage() {
         .select(
           `
           *,
-          restorant(*, restorant_menu(*))
+          restaurant(*, restaurant_menu(*))
           `
         )
         .eq("id", id)
@@ -36,7 +36,7 @@ export default function YoutuberPage() {
 
       if (youtuberData) {
         setYoutuber(youtuberData);
-        setRestorants(youtuberData.restorant);
+        setRestaurants(youtuberData.restaurant);
       }
     };
 
@@ -68,8 +68,8 @@ export default function YoutuberPage() {
       <hr className="my-5" />
       <h2 className="font-bold text-lg">최근 추천 식당</h2>
       <ul>
-        {restorants.map((restorant) => (
-          <RestorantItem key={restorant.id} restorant={restorant} />
+        {restaurants.map((restaurant) => (
+          <RestaurantItem key={restaurant.id} restaurant={restaurant} />
         ))}
       </ul>
     </Container>

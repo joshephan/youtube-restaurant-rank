@@ -1,4 +1,4 @@
-import { IRestorant, IRestorantHistory, TYoutuber } from "@/types";
+import { IRestaurant, IRestaurantHistory, TYoutuber } from "@/types";
 import { create } from "zustand";
 
 // 맛집 리스트 저장, 캐시 처리
@@ -6,18 +6,18 @@ import { create } from "zustand";
 // 저장 > Session
 // 업데이트 주기가 길어도 됨
 
-type restorantState = {
-  list: IRestorant[];
+type restaurantState = {
+  list: IRestaurant[];
 };
 
-const useRestorantList = create<restorantState>((set) => ({
+const useRestaurantList = create<restaurantState>((set) => ({
   list: [], // 최대 1000개, CRUD
-  add: (item: IRestorant) =>
+  add: (item: IRestaurant) =>
     set((state: any) => ({
       list: [...state.list, item],
     })),
   // 모든 수정은 이곳에서 처리
-  addHistory: (item: IRestorantHistory) =>
+  addHistory: (item: IRestaurantHistory) =>
     set((state: any) => ({
       // 고민해서 작성
     })),
@@ -73,4 +73,4 @@ const useUser = create<TUser>((set) => ({
     })),
 }));
 
-export { useRestorantList, useUser, useYoutuber };
+export { useRestaurantList, useUser, useYoutuber };

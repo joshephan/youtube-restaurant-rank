@@ -4,17 +4,17 @@ import Container from "@/components/Container";
 import { useSupabase } from "@/utils/hooks/useSupabase";
 import Link from "next/link";
 import Image from "next/image";
-import { IRestorant, TYoutuber } from "@/types";
+import { IRestaurant, TYoutuber } from "@/types";
 
 export default function Home() {
   const { supabase } = useSupabase();
-  const [recentRestorants, setRecentRestorants] = useState<IRestorant[]>([]);
+  const [recentRestaurants, setRecentRestaurants] = useState<IRestaurant[]>([]);
   const [youtubers, setYoutubers] = useState<TYoutuber[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: restorants } = await supabase
-        .from("restorant")
+      const { data: restaurants } = await supabase
+        .from("restaurant")
         .select("*")
         .order("createdAt", { ascending: false })
         .limit(5);
@@ -24,7 +24,7 @@ export default function Home() {
         .select("*")
         .limit(10);
 
-      if (restorants) setRecentRestorants(restorants);
+      if (restaurants) setRecentRestaurants(restaurants);
       if (youtuberData) setYoutubers(youtuberData);
     };
 
@@ -47,27 +47,27 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* Recent Restorants Section */}
+      {/* Recent Restaurants Section */}
       <section className="mb-12">
         <h2 className="text-2xl font-bold mb-4">최근 등록된 맛집</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recentRestorants.map((restorant) => (
+          {recentRestaurants.map((restaurant) => (
             <Link
-              href={`/r/${restorant.id}`}
-              key={restorant.id}
+              href={`/r/${restaurant.id}`}
+              key={restaurant.id}
               className="border rounded-lg p-4 hover:shadow-md transition-shadow"
             >
-              {restorant.heroBannerSrc && (
+              {restaurant.heroBannerSrc && (
                 <Image
-                  src={restorant.heroBannerSrc}
-                  alt={restorant.name}
+                  src={restaurant.heroBannerSrc}
+                  alt={restaurant.name}
                   width={300}
                   height={200}
                   className="w-full h-48 object-cover mb-4 rounded"
                 />
               )}
-              <h3 className="font-semibold text-lg mb-2">{restorant.name}</h3>
-              <p className="text-gray-600">{restorant.locationText}</p>
+              <h3 className="font-semibold text-lg mb-2">{restaurant.name}</h3>
+              <p className="text-gray-600">{restaurant.locationText}</p>
             </Link>
           ))}
         </div>

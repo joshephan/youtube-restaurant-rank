@@ -2,7 +2,7 @@
 import Container from "@/components/Container";
 import InputField from "@/components/InputField";
 import { useUser, useYoutuber } from "@/store";
-import { InsertedMenu, RestorantEditableField, TYoutuber } from "@/types";
+import { InsertedMenu, RestaurantEditableField, TYoutuber } from "@/types";
 import { mergeClassNames } from "@/utils/convert";
 import { useSupabase } from "@/utils/hooks/useSupabase";
 import { IconSalad, IconTrashXFilled } from "@tabler/icons-react";
@@ -65,7 +65,7 @@ export default function CreatePage() {
     {
       authorId: "",
       name: "",
-      restorantId: 0,
+      restaurantId: 0,
       price: 0,
       description: null,
       imageSrc: null,
@@ -73,7 +73,7 @@ export default function CreatePage() {
     },
   ]);
   const [youtubers, setYoutubers] = useState<number[]>([]);
-  const [restorant, setRestorant] = useState<RestorantEditableField>({
+  const [restaurant, setRestaurant] = useState<RestaurantEditableField>({
     name: "테스트용 맛집",
     locationText: "테스트용 주소",
     category: "한식",
@@ -89,7 +89,7 @@ export default function CreatePage() {
       ...prev,
       {
         authorId: id,
-        restorantId: 0,
+        restaurantId: 0,
         name: "",
         price: 0,
         description: null,
@@ -105,7 +105,7 @@ export default function CreatePage() {
     });
   };
 
-  const createRestorant = async () => {
+  const createRestaurant = async () => {
     if (createLoading) {
       return;
     }
@@ -126,48 +126,48 @@ export default function CreatePage() {
 
     setCreateLoading(true);
 
-    const { data } = await supabase.from("restorant").select();
+    const { data } = await supabase.from("restaurant").select();
 
-    console.log("restorant: ", data);
+    console.log("restaurant: ", data);
 
     // Insert restaurant first
-    const { data: insertedRestorant, error: restorantError } = await supabase
-      .from("restorant")
+    const { data: insertedRestaurant, error: restaurantError } = await supabase
+      .from("restaurant")
       .insert({
-        ...restorant,
+        ...restaurant,
         authorId: id,
       })
       .select("id");
 
-    if (restorantError) {
-      console.error("Error inserting restaurant:", restorantError);
+    if (restaurantError) {
+      console.error("Error inserting restaurant:", restaurantError);
       toast.error("🥘 식당 업로드가 실패했습니다!!");
       setCreateLoading(false);
       return;
     }
 
-    if (!insertedRestorant || insertedRestorant.length === 0) {
+    if (!insertedRestaurant || insertedRestaurant.length === 0) {
       console.error("Failed to get inserted restaurant ID");
       toast.error("💩 서비스가 뭔가가 실패했습니다!!");
       setCreateLoading(false);
       return;
     }
 
-    const newRestorantId = insertedRestorant[0].id;
+    const newRestaurantId = insertedRestaurant[0].id;
 
-    // Insert entries into restorant_youtuber table
+    // Insert entries into restaurant_youtuber table
     const { error: youtuberError } = await supabase
-      .from("restorant_youtuber")
+      .from("restaurant_youtuber")
       .insert(
         youtubers.map((youtuberId) => ({
-          restorantId: newRestorantId,
+          restaurantId: newRestaurantId,
           youtuberId: youtuberId,
         }))
       );
 
     if (youtuberError) {
       console.error(
-        "Error inserting restorant_youtuber entries:",
+        "Error inserting restaurant_youtuber entries:",
         youtuberError
       );
       toast.error("🎥 유튜버 연결에 실패했습니다!!");
@@ -177,12 +177,12 @@ export default function CreatePage() {
 
     // Insert menu items and get their IDs
     const { data: insertedMenus, error: menuError } = await supabase
-      .from("restorant_menu")
+      .from("restaurant_menu")
       .insert(
         menuItems.map((el) => ({
           ...el,
           authorId: id,
-          restorantId: newRestorantId,
+          restaurantId: newRestaurantId,
         }))
       )
       .select("id");
@@ -194,9 +194,9 @@ export default function CreatePage() {
       return;
     }
 
-    if (insertedRestorant && insertedRestorant.length > 0) {
-      const newRestorantId = insertedRestorant[0].id;
-      router.push(`/r/${newRestorantId}`);
+    if (insertedRestaurant && insertedRestaurant.length > 0) {
+      const newRestaurantId = insertedRestaurant[0].id;
+      router.push(`/r/${newRestaurantId}`);
     } else {
       console.error("Failed to get inserted restaurant ID");
       toast.error("💩 서비스가 뭔가가 실패했습니다!!");
@@ -215,9 +215,9 @@ export default function CreatePage() {
                 key={el.label}
                 label={el.label}
                 // @ts-ignore
-                value={restorant[el.key as keyof RestorantEditableField]}
+                value={restaurant[el.key as keyof RestaurantEditableField]}
                 onChange={(value) => {
-                  setRestorant((prev) => ({
+                  setRestaurant((prev) => ({
                     ...prev,
                     [el.key]: value,
                   }));
@@ -350,7 +350,7 @@ export default function CreatePage() {
           <button
             disabled={createLoading}
             onClick={async () => {
-              await createRestorant();
+              await createRestaurant();
             }}
             className={mergeClassNames(
               "flex gap-1 items-center", // display & alignment
