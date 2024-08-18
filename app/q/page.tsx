@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { useSupabase } from "@/utils/hooks/useSupabase";
+import { useSupabase } from "@/hooks/useSupabase";
 import Container from "@/components/Container";
 import RestaurantItem from "@/components/RestaurantItem";
 import YoutuberItem from "@/components/YoutuberItem";

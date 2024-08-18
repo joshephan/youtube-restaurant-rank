@@ -50,9 +50,9 @@ export interface IRestaurantHistory extends RestaurantEditableField {
 export interface IRestaurant extends RestaurantEditableField {
   id: number; // 프라이머리 키
   authorId: string; // 작성자 아이디
-  createdAt: Date; // 생성일
-  updatedAt: Date; // 최근 수정일
-  history: IRestaurantHistory[]; // 변경된 레코드
+  createdAt?: Date; // 생성일
+  updatedAt?: Date; // 최근 수정일
+  history?: IRestaurantHistory[]; // 변경된 레코드
 }
 
 /**

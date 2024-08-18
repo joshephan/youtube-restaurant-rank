@@ -1,7 +1,7 @@
 "use client";
 import Container from "@/components/Container";
 import { useUser } from "@/store";
-import { useSupabase } from "@/utils/hooks/useSupabase";
+import { useSupabase } from "@/hooks/useSupabase";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";

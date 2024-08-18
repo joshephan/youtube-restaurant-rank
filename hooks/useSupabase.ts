@@ -1,6 +1,6 @@
 "use client";
 import { useUser, useYoutuber } from "@/store";
-import { createClient } from "../supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { useCallback, useEffect } from "react";
 
 export const useSupabase = () => {

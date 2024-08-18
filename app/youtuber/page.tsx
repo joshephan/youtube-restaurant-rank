@@ -2,7 +2,7 @@
 import Container from "@/components/Container";
 import YoutuberItem from "@/components/YoutuberItem";
 import { TYoutuber } from "@/types";
-import { useSupabase } from "@/utils/hooks/useSupabase";
+import { useSupabase } from "@/hooks/useSupabase";
 import React, { useEffect, useState } from "react";
 
 export default function YoutubersPage() {

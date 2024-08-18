@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Container from "@/components/Container";
-import { useSupabase } from "@/utils/hooks/useSupabase";
+import { useSupabase } from "@/hooks/useSupabase";
 import Link from "next/link";
 import Image from "next/image";
 import { IRestaurant, TYoutuber } from "@/types";

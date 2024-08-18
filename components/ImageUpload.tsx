@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { useSupabase } from "@/utils/hooks/useSupabase";
+import { useSupabase } from "@/hooks/useSupabase";
 import { v4 as uuidv4 } from "uuid";
 
 interface ImageUploadProps {
@@ -13,8 +13,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   initialImageSrc,
 }) => {
   const [imageSrc, setImageSrc] = useState<string>(initialImageSrc || "");
-  const [urlInput, setUrlInput] = useState<string>("");
-  const { supabase } = useSupabase();
+  const { id, supabase } = useSupabase();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -27,7 +26,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   const uploadImage = async (file: File) => {
     const fileExt = file.name.split(".").pop();
-    const fileName = `${uuidv4()}.${fileExt}`;
+    const fileName = `/${id}/${uuidv4()}.${fileExt}`;
     const { data, error } = await supabase.storage
       .from("images")
       .upload(fileName, file);
@@ -36,7 +35,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       console.error("Error uploading image:", error);
       return;
     }
-    
+
     const {
       data: { publicUrl },
     } = supabase.storage.from("images").getPublicUrl(fileName);
@@ -54,7 +53,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     if (formerImageName) {
       const { error } = await supabase.storage
         .from("images")
-        .remove([formerImageName]);
+        .remove([`${id}/${formerImageName}`]);
 
       if (error) {
         console.error("Error deleting former image:", error);
@@ -62,20 +61,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   };
 
-  const handleUrlSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (urlInput) {
-      if (imageSrc) {
-        await deleteFormerImage();
-      }
-      setImageSrc(urlInput);
-      onImageChange(urlInput);
-      setUrlInput("");
+  useEffect(() => {
+    if (initialImageSrc) {
+      setImageSrc(initialImageSrc);
     }
-  };
+  }, [initialImageSrc]);
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 w-full max-w-72">
       <div
         {...getRootProps()}
         className={`border-2 border-dashed p-4 text-center cursor-pointer ${
@@ -84,26 +77,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       >
         <input {...getInputProps()} />
         {isDragActive ? (
-          <p>Drop the image here ...</p>
+          <p>이미지를 이곳에 두세요 ...</p>
         ) : (
-          <p>Drag 'n' drop an image here, or click to select one</p>
+          <p>이미지 업로드</p>
         )}
       </div>
-      <form onSubmit={handleUrlSubmit} className="mt-4">
-        <input
-          type="url"
-          value={urlInput}
-          onChange={(e) => setUrlInput(e.target.value)}
-          placeholder="Or enter image URL here"
-          className="w-full p-2 border rounded"
-        />
-        <button
-          type="submit"
-          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Submit URL
-        </button>
-      </form>
       {imageSrc && (
         <div className="mt-4">
           <img src={imageSrc} alt="Uploaded" className="max-w-full h-auto" />

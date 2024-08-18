@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useParams } from "next/navigation";
-import { useSupabase } from "@/utils/hooks/useSupabase";
+import { useSupabase } from "@/hooks/useSupabase";
 import { useEffect, useState } from "react";
 import { TYoutuber, IRestaurant } from "@/types";
 import Container from "@/components/Container";

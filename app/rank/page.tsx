@@ -1,7 +1,8 @@
 "use client";
+import Container from "@/components/Container";
 import RestaurantItem from "@/components/RestaurantItem";
 import { IRestaurant } from "@/types";
-import { useSupabase } from "@/utils/hooks/useSupabase";
+import { useSupabase } from "@/hooks/useSupabase";
 import React, { useEffect, useState } from "react";
 
 export default function RestaurantRankPage() {
@@ -9,25 +10,13 @@ export default function RestaurantRankPage() {
   const [list, setList] = useState<IRestaurant[]>([]);
 
   const getRestaurants = async () => {
-    const { data: restaurants } = await supabase.from("restaurant").select("*");
+    const { data: restaurants } = await supabase.from("restaurant").select(`*,
+      restaurant_menu(*),
+      youtuber(*)
+      `);
 
     if (restaurants) {
-      const restaurantsWithYoutubers = await Promise.all(
-        restaurants.map(async (restaurant) => {
-          const { data: menus } = await supabase
-            .from("restaurant_menu")
-            .select("*")
-            .in("id", restaurant.menus);
-
-          const { data: youtubers } = await supabase
-            .from("youtuber")
-            .select("*")
-            .in("id", restaurant.youtubers);
-          return { ...restaurant, youtubers, menus };
-        })
-      );
-      console.log(restaurantsWithYoutubers);
-      setList(restaurantsWithYoutubers);
+      setList(restaurants);
     }
   };
 
@@ -36,10 +25,12 @@ export default function RestaurantRankPage() {
   }, []);
 
   return (
-    <div>
+    <Container>
       {list.map((el) => {
-        return <RestaurantItem key={`${el.id}-youtuber-item`} restaurant={el} />;
+        return (
+          <RestaurantItem key={`${el.id}-youtuber-item`} restaurant={el} />
+        );
       })}
-    </div>
+    </Container>
   );
 }
