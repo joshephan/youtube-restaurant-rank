@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSupabase } from "@/utils/hooks/useSupabase";
 import Container from "@/components/Container";
@@ -7,7 +7,7 @@ import RestorantItem from "@/components/RestorantItem";
 import YoutuberItem from "@/components/YoutuberItem";
 import { IRestorant, TYoutuber } from "@/types";
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const keyword = searchParams.get("keyword") || "";
   const { supabase } = useSupabase();
@@ -88,5 +88,13 @@ export default function SearchPage() {
         youtubers.length === 0 &&
         menus.length === 0 && <p>No results found for "{keyword}"</p>}
     </Container>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchContent />
+    </Suspense>
   );
 }
